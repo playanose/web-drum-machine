@@ -3,75 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SP-MPC 12-BIT EDITION</title>
+    <title>SP-MPC STUDIO MASTER</title>
     <style>
         :root { 
-            --mpc-beige: #c5c5b5; 
-            --mpc-dark: #a8a898; 
-            --lcd-blue: #7098af; 
-            --lcd-text: #0b1a2a;
-            --pad-grey: #4a4a4a;
+            --mpc-beige: #c5c5b5; --mpc-dark: #a8a898; --mpc-panel: #8e8e7e; 
+            --lcd-blue: #7098af; --lcd-text: #0b1a2a; --pad-grey: #4a4a4a;
             --active-blue: #00ccff;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #1a1a1a; color: #333; font-family: 'Helvetica', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
-        
-        .sp-container { background: var(--mpc-beige); width: 98vw; max-width: 950px; height: 94vh; padding: 20px; border: 4px solid #888; box-shadow: 10px 10px 30px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 10px; }
-        
+        .sp-container { background: var(--mpc-beige); width: 98vw; max-width: 950px; height: 96vh; padding: 20px; border: 4px solid #888; border-radius: 4px; box-shadow: 10px 10px 40px rgba(0,0,0,0.7); display: flex; flex-direction: column; gap: 8px; }
         .lcd { background: var(--lcd-blue); color: var(--lcd-text); padding: 12px; border: 4px inset #888; border-radius: 2px; display: flex; flex-direction: column; min-height: 130px; font-family: monospace; position: relative; }
-        #visualizer { width: 100%; height: 40px; margin-top: auto; opacity: 0.8; }
-        
+        #visualizer { width: 100%; height: 45px; margin-top: auto; }
         .lofi-toggle { position: absolute; right: 10px; top: 35px; background: #0b1a2a; color: var(--lcd-blue); border: 1px solid var(--lcd-blue); font-size: 10px; cursor: pointer; padding: 4px 8px; }
-        .lofi-toggle.active { background: #ff3300; color: white; border-color: white; }
-
+        .lofi-toggle.active { background: #ff3300; color: white; }
         .metro-box { display: flex; align-items: center; gap: 8px; background: var(--mpc-dark); padding: 8px; border: 2px inset #999; }
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; flex: 1; background: #555; padding: 12px; border: 4px inset #333; }
-        .pad { aspect-ratio: 1; background: var(--pad-grey); border: 3px solid #222; border-radius: 3px; cursor: pointer; position: relative; box-shadow: 3px 3px 0 #222; }
-        .pad.playing { background: #777 !important; box-shadow: 0 0 15px var(--active-blue); border-color: white; }
-        .pad-label { position: absolute; bottom: 4px; width: 100%; text-align: center; font-size: 9px; color: #fff; font-weight: bold; }
-
-        .bank-bar { display: flex; flex-direction: column; width: 60px; gap: 5px; }
-        .bank-btn { flex: 1; background: #eee; border: 2px outset #fff; font-weight: bold; }
-        .bank-btn.active { background: var(--active-blue); border: 2px inset #0099cc; }
-
-        .footer { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; }
-        .btn { padding: 10px; background: #dcdcdc; border: 2px outset #fff; font-weight: bold; font-size: 10px; cursor: pointer; }
-        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--mpc-beige); border: 4px solid #444; padding: 20px; z-index: 2000; display: none; flex-direction: column; gap: 10px; width: 320px; }
+        .beat-dot { width: 10px; height: 10px; background: #444; border: 1px solid #222; }
+        .beat-dot.active { background: #ff3300; }
+        .main-engine-bay { display: flex; flex: 1; gap: 10px; min-height: 0; }
+        .bank-bar { display: flex; flex-direction: column; width: 60px; gap: 4px; }
+        .bank-btn { flex: 1; background: #eee; border: 2px outset #fff; font-weight: bold; cursor: pointer; }
+        .bank-btn.active { background: var(--active-blue); border-style: inset; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; flex: 1; background: #555; padding: 10px; border: 4px inset #333; }
+        .pad { aspect-ratio: 1; background: var(--pad-grey); border: 3px solid #222; border-radius: 4px; cursor: pointer; position: relative; box-shadow: 3px 3px 0 #222; }
+        .pad.playing { background: #888 !important; box-shadow: 0 0 15px var(--active-blue); border-color: #fff; }
+        .pad-label { position: absolute; bottom: 4px; width: 100%; text-align: center; font-size: 9px; color: #fff; font-weight: bold; pointer-events: none; }
+        .footer { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 6px; }
+        .btn { padding: 10px; border-radius: 2px; font-weight: bold; cursor: pointer; font-size: 10px; background: #dcdcdc; border: 2px outset #fff; text-transform: uppercase; }
+        .btn:active { border-style: inset; }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--mpc-beige); border: 4px solid #444; padding: 20px; z-index: 2000; display: none; flex-direction: column; gap: 10px; width: 340px; box-shadow: 0 0 100px #000; }
+        input[type=range] { width: 100%; height: 8px; background: #888; appearance: none; }
+        input[type=range]::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; background: #444; border: 2px outset #eee; }
     </style>
 </head>
 <body>
 
 <div id="settings-modal" class="modal">
-    <div style="font-weight:bold; border-bottom:1px solid #888;">SAMPLE PARAMETERS</div>
-    <div style="display:flex; justify-content:space-between;">
-        <button class="btn" style="color:red" onclick="togglePadRecord()">RECORD</button>
-        <button class="btn" onclick="preview()">PLAY</button>
+    <div style="font-weight:bold; border-bottom:1px solid #888;">PAD EDIT</div>
+    <div style="display:flex; justify-content:space-between; gap:5px;">
+        <button class="btn" id="pad-rec-btn" style="color:red; flex:1;" onclick="togglePadRecord()">SAMPLING</button>
+        <button class="btn" id="preview-btn" style="flex:1;" onclick="togglePreview()">TEST</button>
     </div>
-    <canvas id="waveform-display" width="280" height="80" style="background:var(--lcd-blue); border:2px inset #666;"></canvas>
-    <input type="text" id="p-name" placeholder="NAME" style="padding:8px; border:2px inset #888;">
+    <canvas id="waveform-display" width="300" height="80" style="background:var(--lcd-blue); border:2px inset #666;"></canvas>
+    <input type="text" id="p-name" placeholder="NAME" style="width:100%; padding:8px; border:2px inset #888;">
     <input type="range" id="p-pitch" min="0.5" max="2" step="0.01" value="1.0">
-    <button class="btn" onclick="closeSettings()">EXIT</button>
+    <button class="btn" onclick="closeSettings()">DONE</button>
 </div>
 
 <div class="sp-container">
     <div class="lcd">
-        <div style="display:flex; justify-content:space-between;">
-            <span>MPC-WEB 12BIT</span>
+        <div style="display:flex; justify-content:space-between; font-weight:bold;">
+            <span>STUDIO MASTER</span>
             <span>BPM: <span id="v-bpm-lcd">120</span></span>
         </div>
         <button id="lofi-btn" class="lofi-toggle" onclick="toggleLofi()">12-BIT: OFF</button>
-        <div style="font-size:10px; margin-top:5px;">BANK: <span id="display-bank">A</span> | STATUS: READY</div>
+        <div style="font-size:10px; margin-top:4px;">BANK: <span id="display-bank">A</span> | DISK: OK</div>
         <canvas id="visualizer"></canvas>
     </div>
 
     <div class="metro-box">
-        <div id="metro-light" style="width:10px; height:10px; background:#444;"></div>
+        <div id="metro-light" class="beat-dot"></div>
         <input type="range" id="m-bpm" min="40" max="220" value="120" style="flex:1;">
         <button class="btn" onclick="tapTempo()">TAP</button>
         <button class="btn" id="metro-toggle" onclick="toggleMetronome()">METRO</button>
     </div>
 
-    <div style="display:flex; flex:1; gap:15px; min-height:0;">
+    <div class="main-engine-bay">
         <div class="bank-bar">
             <button class="bank-btn active" onclick="setBank('A')">A</button>
             <button class="bank-btn" onclick="setBank('B')">B</button>
@@ -83,64 +80,39 @@
 
     <div class="footer">
         <button class="btn" onclick="document.getElementById('f-in').click()">IMPORT</button>
-        <button class="btn" onclick="autoChop()">CHOP</button>
+        <button class="btn" onclick="saveProject()">SAVE PROJ</button>
+        <button class="btn" onclick="document.getElementById('p-in').click()">LOAD PROJ</button>
         <button class="btn" id="rec-btn" onclick="toggleRec()" style="color:red">REC WAVE</button>
-        <button class="btn" onclick="panic()">STOP</button>
+        <button class="btn" onclick="panic()" style="background:#555; color:white;">STOP ALL</button>
     </div>
 </div>
 
 <input type="file" id="f-in" hidden accept="audio/*">
+<input type="file" id="p-in" hidden accept=".json" onchange="loadProject(event)">
 
 <script>
-let audioCtx, masterBus, limiter, analyser, dataArray, lofiNode;
+let audioCtx, masterBus, limiter, lofiNode, activeSources = [];
 let banks = { A: {}, B: {}, C: {}, D: {} };
 let currentBank = 'A', editingIdx = null, isRec = false, chunks = [], isLofi = false;
-let metroOn = false, nextBeatTime = 0, bpm = 120, tapTimes = [];
+let micRec, previewSrc = null, tapTimes = [], metroOn = false, nextBeatTime = 0, bpm = 120;
 
 function init() {
     if (audioCtx) return;
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     masterBus = audioCtx.createGain();
     limiter = audioCtx.createDynamicsCompressor();
-    analyser = audioCtx.createAnalyser();
-    
-    // Create Bitcrusher Node
     lofiNode = audioCtx.createScriptProcessor(4096, 1, 1);
     lofiNode.onaudioprocess = (e) => {
-        let input = e.inputBuffer.getChannelData(0);
-        let output = e.outputBuffer.getChannelData(0);
-        let bits = 12; // 12-bit depth
-        let step = Math.pow(0.5, bits);
-        let phaser = 0;
-        let downsample = 2; // Reduce sample quality
-        
+        let input = e.inputBuffer.getChannelData(0), output = e.outputBuffer.getChannelData(0);
+        let step = Math.pow(0.5, 12), phaser = 0;
         for (let i = 0; i < input.length; i++) {
-            if (isLofi) {
-                // Bit reduction & Downsampling logic
-                if (i % downsample === 0) phaser = step * Math.floor(input[i] / step);
-                output[i] = phaser;
-            } else {
-                output[i] = input[i];
-            }
+            if (isLofi) { if (i % 2 === 0) phaser = step * Math.floor(input[i] / step); output[i] = phaser; }
+            else { output[i] = input[i]; }
         }
     };
-
-    masterBus.connect(lofiNode);
-    lofiNode.connect(limiter);
-    limiter.connect(analyser);
-    analyser.connect(audioCtx.destination);
-
-    analyser.fftSize = 64; dataArray = new Uint8Array(analyser.frequencyBinCount);
+    masterBus.connect(lofiNode); lofiNode.connect(limiter); limiter.connect(audioCtx.destination);
     ['A','B','C','D'].forEach(b => { for(let i=0; i<16; i++) banks[b][i] = { buffer: null, name: `PAD ${i+1}`, pitch: 1 }; });
-    render(); drawViz(); scheduler();
-}
-
-function toggleLofi() {
-    if(!audioCtx) init();
-    isLofi = !isLofi;
-    const btn = document.getElementById('lofi-btn');
-    btn.innerText = isLofi ? "12-BIT: ON" : "12-BIT: OFF";
-    btn.classList.toggle('active', isLofi);
+    render(); scheduler();
 }
 
 function playPad(idx) {
@@ -149,75 +121,88 @@ function playPad(idx) {
     const src = audioCtx.createBufferSource();
     src.buffer = p.buffer; src.playbackRate.value = p.pitch;
     src.connect(masterBus);
-    const el = document.getElementById(`pad-${idx}`); el.classList.add('playing');
-    src.onended = () => el.classList.remove('playing');
     src.start(0);
+    activeSources.push(src);
+    const el = document.getElementById(`pad-${idx}`); el.classList.add('playing');
+    src.onended = () => { el.classList.remove('playing'); activeSources = activeSources.filter(s => s !== src); };
 }
 
-// Logic for Metro, Tap, and Sampling remains identical to previous optimized version
-function tapTempo() {
+function togglePreview() {
+    if (previewSrc) { previewSrc.stop(); previewSrc = null; document.getElementById('preview-btn').innerText = "TEST"; }
+    else {
+        const p = banks[currentBank][editingIdx]; if (!p.buffer) return;
+        previewSrc = audioCtx.createBufferSource();
+        previewSrc.buffer = p.buffer; previewSrc.playbackRate.value = p.pitch;
+        previewSrc.connect(masterBus);
+        previewSrc.start(0);
+        document.getElementById('preview-btn').innerText = "STOP";
+        previewSrc.onended = () => { previewSrc = null; document.getElementById('preview-btn').innerText = "TEST"; };
+    }
+}
+
+function panic() {
+    activeSources.forEach(s => { try { s.stop(); } catch(e) {} });
+    activeSources = [];
+    if (previewSrc) { previewSrc.stop(); previewSrc = null; }
+    document.querySelectorAll('.pad').forEach(p => p.classList.remove('playing'));
+}
+
+async function saveProject() {
+    const projectData = {};
+    for (let b in banks) {
+        projectData[b] = {};
+        for (let i in banks[b]) {
+            const p = banks[b][i];
+            projectData[b][i] = { name: p.name, pitch: p.pitch, audio: p.buffer ? bufferToBase64(p.buffer) : null };
+        }
+    }
+    const blob = new Blob([JSON.stringify(projectData)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'STUDIO_PROJ.json'; a.click();
+}
+
+async function loadProject(e) {
+    const file = e.target.files[0]; if (!file) return;
+    const data = JSON.parse(await file.text());
     if (!audioCtx) init();
-    const now = performance.now(); tapTimes.push(now);
-    if (tapTimes.length > 4) tapTimes.shift();
-    if (tapTimes.length > 1) {
-        bpm = Math.round(60000 / ((tapTimes[tapTimes.length-1] - tapTimes[0]) / (tapTimes.length - 1)));
-        document.getElementById('m-bpm').value = bpm;
-        document.getElementById('v-bpm-lcd').innerText = bpm;
+    for (let b in data) {
+        for (let i in data[b]) {
+            const p = data[b][i];
+            banks[b][i] = { name: p.name, pitch: p.pitch, buffer: p.audio ? await base64ToBuffer(p.audio) : null };
+        }
     }
+    render();
 }
 
+function bufferToBase64(buffer) {
+    const channelData = buffer.getChannelData(0);
+    return btoa(String.fromCharCode.apply(null, new Uint16Array(channelData.buffer)));
+}
+
+async function base64ToBuffer(base64) {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const floatData = new Float32Array(bytes.buffer);
+    const buffer = audioCtx.createBuffer(1, floatData.length, audioCtx.sampleRate);
+    buffer.copyToChannel(floatData, 0);
+    return buffer;
+}
+
+// Logic for Metro, Tap, and Sampling
+function tapTempo() {
+    if (!audioCtx) init(); const now = performance.now(); tapTimes.push(now); if (tapTimes.length > 4) tapTimes.shift();
+    if (tapTimes.length > 1) { bpm = Math.round(60000 / ((tapTimes[tapTimes.length-1] - tapTimes[0]) / (tapTimes.length - 1))); document.getElementById('m-bpm').value = bpm; document.getElementById('v-bpm-lcd').innerText = bpm; }
+}
 function toggleMetronome() { if (!audioCtx) init(); metroOn = !metroOn; if (metroOn) nextBeatTime = audioCtx.currentTime; }
-function scheduler() {
-    if (metroOn && nextBeatTime < audioCtx.currentTime + 0.1) {
-        const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
-        osc.frequency.setValueAtTime(800, nextBeatTime);
-        g.gain.setValueAtTime(0.05, nextBeatTime);
-        g.gain.exponentialRampToValueAtTime(0.001, nextBeatTime + 0.04);
-        osc.connect(g); g.connect(audioCtx.destination);
-        osc.start(nextBeatTime); osc.stop(nextBeatTime + 0.04);
-        nextBeatTime += 60.0 / bpm;
-    }
-    setTimeout(scheduler, 25);
-}
-
-async function togglePadRecord() {
-    if (!micRec || micRec.state === "inactive") {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        micRec = new MediaRecorder(stream); micChunks = [];
-        micRec.ondataavailable = (e) => micChunks.push(e.data);
-        micRec.onstop = async () => {
-            const fullBuffer = await audioCtx.decodeAudioData(await (new Blob(micChunks)).arrayBuffer());
-            const data = fullBuffer.getChannelData(0); let s = 0, e = data.length, t = 0.01;
-            for (let i = 0; i < data.length; i++) { if (Math.abs(data[i]) > t) { s = i; break; } }
-            for (let i = data.length - 1; i >= 0; i--) { if (Math.abs(data[i]) > t) { e = i; break; } }
-            const trimmed = audioCtx.createBuffer(1, Math.max(1, e-s), fullBuffer.sampleRate);
-            trimmed.copyToChannel(data.subarray(s,e), 0);
-            banks[currentBank][editingIdx].buffer = trimmed;
-            render();
-        };
-        micRec.start();
-    } else { micRec.stop(); }
-}
-
-function render() {
-    const g = document.getElementById('grid'); g.innerHTML = '';
-    for(let i=0; i<16; i++) {
-        const p = banks[currentBank][i]; const b = document.createElement('button');
-        b.id = `pad-${i}`; b.className = `pad ${p.buffer?'has-sample':''}`;
-        b.innerHTML = `<span class="pad-label">${p.name}</span>`;
-        b.onmousedown = (e)=>{ if(e.button===0) playPad(i); };
-        b.oncontextmenu = (e)=>{ e.preventDefault(); editingIdx = i; document.getElementById('settings-modal').style.display='flex'; };
-        g.appendChild(b);
-    }
-}
-
-document.getElementById('m-bpm').oninput = (e) => { bpm = e.target.value; document.getElementById('v-bpm-lcd').innerText = bpm; };
-function drawViz() { requestAnimationFrame(drawViz); if(!analyser) return; const ctx = document.getElementById('visualizer').getContext('2d'); analyser.getByteFrequencyData(dataArray); ctx.clearRect(0,0,300,150); ctx.fillStyle = '#0b1a2a'; for(let i=0; i<dataArray.length; i++){ ctx.fillRect(i*10, 150-dataArray[i]/2, 7, dataArray[i]/2); } }
+function scheduler() { if (metroOn && nextBeatTime < audioCtx.currentTime + 0.1) { const osc = audioCtx.createOscillator(); const g = audioCtx.createGain(); osc.frequency.setValueAtTime(800, nextBeatTime); g.gain.setValueAtTime(0.05, nextBeatTime); g.gain.exponentialRampToValueAtTime(0.001, nextBeatTime + 0.05); osc.connect(g); g.connect(audioCtx.destination); osc.start(nextBeatTime); osc.stop(nextBeatTime + 0.05); setTimeout(() => { document.getElementById('metro-light').classList.add('active'); setTimeout(() => document.getElementById('metro-light').classList.remove('active'), 60); }, (nextBeatTime - audioCtx.currentTime)*1000); nextBeatTime += 60.0 / bpm; } setTimeout(scheduler, 25); }
+function toggleLofi() { isLofi = !isLofi; document.getElementById('lofi-btn').innerText = isLofi ? "12-BIT: ON" : "12-BIT: OFF"; document.getElementById('lofi-btn').classList.toggle('active', isLofi); }
+function render() { const g = document.getElementById('grid'); g.innerHTML = ''; for(let i=0; i<16; i++) { const p = banks[currentBank][i]; const b = document.createElement('button'); b.id = `pad-${i}`; b.className = `pad ${p.buffer?'has-sample':''}`; b.innerHTML = `<span class="pad-label">${p.name}</span>`; b.onmousedown = (e)=>{ if(e.button===0) playPad(i); }; b.oncontextmenu = (e)=>{ e.preventDefault(); editingIdx = i; document.getElementById('settings-modal').style.display='flex'; drawWaveform(p.buffer); }; g.appendChild(b); } }
 function closeSettings() { const p = banks[currentBank][editingIdx]; p.name = document.getElementById('p-name').value; p.pitch = parseFloat(document.getElementById('p-pitch').value); document.getElementById('settings-modal').style.display = 'none'; render(); }
-function setBank(b) { currentBank = b; render(); }
-function toggleRec() { if(!isRec) { const d = audioCtx.createMediaStreamDestination(); limiter.connect(d); mediaRec = new MediaRecorder(d.stream); mediaRec.ondataavailable = (e)=>chunks.push(e.data); mediaRec.onstop = ()=>{ const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(chunks, {type:'audio/wav'})); a.download = `VINTAGE_BEAT.wav`; a.click(); chunks = []; }; mediaRec.start(); isRec = true; } else { mediaRec.stop(); isRec = false; } }
-function panic() { if(audioCtx) audioCtx.suspend().then(()=>audioCtx.resume()); }
-function preview() { if (editingIdx !== null) playPad(editingIdx); }
+function setBank(b) { currentBank = b; document.querySelectorAll('.bank-btn').forEach(x => x.classList.toggle('active', x.innerText===b)); render(); }
+function toggleRec() { if(!isRec) { const d = audioCtx.createMediaStreamDestination(); limiter.connect(d); mediaRec = new MediaRecorder(d.stream); mediaRec.ondataavailable = (e)=>chunks.push(e.data); mediaRec.onstop = ()=>{ const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(chunks, {type:'audio/wav'})); a.download = `STUDIO_SESSION.wav`; a.click(); chunks = []; }; mediaRec.start(); isRec = true; document.getElementById('rec-btn').style.background="red"; } else { mediaRec.stop(); isRec = false; document.getElementById('rec-btn').style.background="#dcdcdc"; } }
+async function togglePadRecord() { if (!micRec || micRec.state === "inactive") { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); micRec = new MediaRecorder(stream); micChunks = []; micRec.ondataavailable = (e) => micChunks.push(e.data); micRec.onstop = async () => { const fullBuffer = await audioCtx.decodeAudioData(await (new Blob(micChunks)).arrayBuffer()); banks[currentBank][editingIdx].buffer = fullBuffer; drawWaveform(fullBuffer); render(); }; micRec.start(); document.getElementById('pad-rec-btn').innerText = "STOP"; } else { micRec.stop(); document.getElementById('pad-rec-btn').innerText = "SAMPLING"; } }
+function drawWaveform(b) { const c = document.getElementById('waveform-display'), x = c.getContext('2d'); x.clearRect(0,0,300,80); if(!b) return; x.strokeStyle="#0b1a2a"; x.lineWidth=2; x.beginPath(); const d = b.getChannelData(0), s = Math.ceil(d.length/300); for(let i=0; i<300; i++) x.lineTo(i, 40+d[i*s]*35); x.stroke(); }
 document.getElementById('f-in').onchange = async (e) => { const b = await audioCtx.decodeAudioData(await e.target.files[0].arrayBuffer()); banks[currentBank][0].buffer = b; render(); };
 document.body.onclick = () => init(); render();
 </script>
