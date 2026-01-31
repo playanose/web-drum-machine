@@ -3,178 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KOALA GLOBAL SEQUENCER</title>
+    <title>MPC 2000XL WORKSTATION</title>
     <style>
         :root { 
-            --koala-red: #ff3b30; --koala-green: #4cd964; --koala-blue: #007aff;
-            --pad-empty: #1a1a1a; --pad-loaded: #a2a2a2; --lcd-bg: #111;
+            --mpc-beige: #d6d6c2; --mpc-blue: #2a4d87; --lcd-green: #94b44b;
+            --pad-grey: #444; --pad-active: #ffcc00;
         }
-        * { box-sizing: border-box; user-select: none; font-family: 'Courier New', monospace; }
-        body { background: #000; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #fff; overflow: hidden; }
+        * { box-sizing: border-box; user-select: none; font-family: 'Verdana', sans-serif; }
+        body { background: #1a1a1a; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #333; }
         
-        .master-container { background: #d1d1c4; width: 98vw; max-width: 900px; height: 98vh; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; border: 3px solid #999; }
+        .mpc-chassis { background: var(--mpc-beige); width: 95vw; max-width: 900px; height: 95vh; padding: 25px; border-radius: 4px; border: 4px solid #888; display: flex; flex-direction: column; gap: 15px; position: relative; box-shadow: 10px 10px 0 #000; }
         
-        .lcd { background: var(--lcd-bg); color: var(--koala-green); padding: 10px; border-radius: 6px; border: 4px inset #555; display: grid; grid-template-columns: repeat(3, 1fr); align-items: center; text-align: center; }
-        .lcd-val { font-size: 18px; font-weight: bold; }
-        .lcd-label { font-size: 8px; text-transform: uppercase; color: #888; }
+        /* CLASSIC LCD SCREEN */
+        .lcd-screen { background: var(--lcd-green); height: 160px; border-radius: 4px; border: 8px solid #333; padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; box-shadow: inset 0 0 15px rgba(0,0,0,0.3); font-family: 'Courier New', monospace; font-weight: bold; }
+        .lcd-data { font-size: 13px; line-height: 1.4; }
+        .lcd-title { background: #333; color: var(--lcd-green); padding: 2px 5px; margin-bottom: 5px; display: inline-block; }
 
-        .bank-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .bank-btn { background: #444; color: #fff; border: 2px outset #666; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
-        .bank-btn.active { background: var(--koala-blue); border-style: inset; box-shadow: 0 0 10px var(--koala-blue); }
+        .main-workspace { display: grid; grid-template-columns: 1fr 350px; gap: 20px; flex: 1; }
+        
+        /* PADS */
+        .pad-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .pad { background: var(--pad-grey); height: 80px; border-radius: 4px; border-bottom: 5px solid #222; border-right: 5px solid #222; cursor: pointer; position: relative; display: flex; align-items: center; justify-content: center; color: #888; font-size: 10px; }
+        .pad:active { border: none; transform: translate(2px, 2px); background: var(--pad-active); color: #000; }
+        .pad.mode-16 { background: #556; color: white; }
 
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 8px; flex: 1; }
-        .pad { background: var(--pad-empty); border: 2px solid #000; border-radius: 8px; position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .pad.has-sample { background: var(--pad-loaded); border-color: #eee; }
-        .pad.playing { background: #fff !important; transform: scale(0.95); transition: 0.05s; }
-        .pad.recording { background: var(--koala-red) !important; animation: blink 0.2s infinite; }
-        .pad-num { position: absolute; top: 4px; left: 6px; font-size: 9px; color: #555; font-weight: bold; }
+        /* SIDE PANEL */
+        .side-controls { display: flex; flex-direction: column; gap: 10px; }
+        .control-group { background: rgba(0,0,0,0.05); padding: 10px; border-radius: 4px; border: 1px solid #aaa; }
+        .btn-mpc { background: #b5b59a; border: 2px outset #eee; padding: 8px; font-size: 11px; font-weight: bold; cursor: pointer; text-transform: uppercase; text-align: center; }
+        .btn-mpc.active { background: var(--mpc-blue); color: white; border-style: inset; }
+        .btn-red { background: #a33; color: white; border-color: #f88; }
 
-        .btn-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-        .btn { background: #333; color: #fff; border: 2px outset #555; padding: 14px; border-radius: 4px; font-weight: bold; font-size: 10px; cursor: pointer; text-transform: uppercase; }
-        .btn.active { background: var(--koala-red); color: white; border-style: inset; }
-
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        input[type=range] { width: 100%; margin: 10px 0; }
+        .label { font-size: 10px; font-weight: bold; display: block; margin-bottom: 2px; }
     </style>
 </head>
 <body>
 
-<div class="master-container">
-    <div class="lcd">
-        <div><span class="lcd-label">ACTIVE BANK</span><div class="lcd-val" id="bank-disp">A</div></div>
-        <div><span class="lcd-label">SEQUENCE</span><div class="lcd-val" id="seq-status">STOPPED</div></div>
-        <div><span class="lcd-label">BPM</span><div class="lcd-val" id="bpm-disp">120</div></div>
+<div class="mpc-chassis">
+    <div class="lcd-screen" id="lcd">
+        <div class="lcd-data">
+            <div class="lcd-title">MAIN SCREEN</div><br>
+            SQ: 01-New Sequence<br>
+            TR: 01-Drums (A01)<br>
+            BPM: <span id="bpm-val">120.0</span><br>
+            TS: 4/4
+        </div>
+        <div class="lcd-data" style="text-align: right;">
+            BAR: 001.01.00<br>
+            QUANTIZE: 1/16<br>
+            MODE: <span id="mode-val">SAMPLER</span><br>
+            SWING: 50%
+        </div>
     </div>
 
-    <div class="bank-row">
-        <button class="bank-btn active" id="btn-A" onclick="switchBank('A')">BANK A</button>
-        <button class="bank-btn" id="btn-B" onclick="switchBank('B')">BANK B</button>
-        <button class="bank-btn" id="btn-C" onclick="switchBank('C')">BANK C</button>
-        <button class="bank-btn" id="btn-D" onclick="switchBank('D')">BANK D</button>
-    </div>
+    <div class="main-workspace">
+        <div class="pad-grid" id="pad-grid"></div>
+        
+        <div class="side-controls">
+            <div class="control-group">
+                <span class="label">DATA ENTRY / PITCH</span>
+                <input type="range" min="0.5" max="2.0" step="0.01" value="1.0" id="data-wheel" oninput="updatePitch(this.value)">
+                <div class="btn-mpc" style="margin-top:5px">TAP TEMPO</div>
+            </div>
 
-    <div class="grid" id="grid"></div>
+            <div class="control-group">
+                <span class="label">PROGRAM TOOLS</span>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                    <div class="btn-mpc" id="btn-16" onclick="toggle16Levels()">16 LEVELS</div>
+                    <div class="btn-mpc" onclick="switchBank()">BANK A-D</div>
+                    <div class="btn-mpc" onclick="document.getElementById('file-in').click()">LOAD WAV</div>
+                    <div class="btn-mpc" onclick="panic()">STOP ALL</div>
+                </div>
+            </div>
 
-    <div class="btn-row">
-        <button class="btn" id="play-btn" onclick="togglePlay()">PLAY</button>
-        <button class="btn" id="rec-btn" onclick="toggleRec()">REC</button>
-        <button class="btn" onclick="clearSeq()">CLEAR SEQ</button>
-        <button class="btn" style="background:#222" onclick="panic()">STOP ALL</button>
+            <div class="control-group">
+                <span class="label">TRANSPORT</span>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                    <div class="btn-mpc btn-red" id="rec-btn" onclick="toggleRec()">REC</div>
+                    <div class="btn-mpc" id="play-btn" onclick="togglePlay()">PLAY</div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
+<input type="file" id="file-in" hidden onchange="handleFile(event)">
+
 <script>
 let audioCtx, masterBus;
-let banks = { A: {}, B: {}, C: {}, D: {} };
-let currentBank = 'A';
-let bpm = 120, isPlaying = false, isRec = false, startTime, sequence = [];
-let mediaRec, chunks = [];
+let pads = Array(16).fill(null).map(() => ({ buffer: null, pitch: 1.0 }));
+let is16Levels = false, lastSelectedBuffer = null;
+let isRec = false, isPlaying = false, bpm = 120, startTime, sequence = [];
 
 function init() {
     if (audioCtx) return;
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     masterBus = audioCtx.createGain(); masterBus.connect(audioCtx.destination);
-    ['A','B','C','D'].forEach(b => {
-        for(let i=0; i<16; i++) banks[b][i] = { buffer: null };
-    });
-    render(); loopEngine();
+    renderPads();
 }
 
-function switchBank(b) {
-    currentBank = b;
-    document.getElementById('bank-disp').innerText = b;
-    ['A','B','C','D'].forEach(bankID => {
-        document.getElementById('btn-' + bankID).classList.toggle('active', bankID === b);
-    });
-    render();
-}
-
-function render() {
-    const g = document.getElementById('grid'); g.innerHTML = '';
-    const data = banks[currentBank];
+function renderPads() {
+    const grid = document.getElementById('pad-grid'); grid.innerHTML = '';
     for(let i=0; i<16; i++) {
-        const p = data[i]; const b = document.createElement('div');
-        b.id = `pad-${i}`;
-        b.className = `pad ${p.buffer ? 'has-sample' : ''}`;
-        b.innerHTML = `<span class="pad-num">${i+1}</span>`;
-        b.onmousedown = () => { if(!audioCtx) init(); if(!p.buffer) startRec(i); else triggerPad(i, true); };
-        b.onmouseup = () => stopRec();
-        g.appendChild(b);
+        const p = document.createElement('div');
+        p.className = `pad ${is16Levels ? 'mode-16' : ''}`;
+        p.innerText = is16Levels ? `PITCH ${i+1}` : `PAD ${String.fromCharCode(65+(Math.floor(i/4)))}${i+1}`;
+        p.onmousedown = (e) => {
+            init();
+            const rect = p.getBoundingClientRect();
+            const distFromCenter = Math.abs(e.clientY - (rect.top + rect.height/2));
+            const velocity = Math.max(0.2, 1 - (distFromCenter / rect.height));
+            triggerPad(i, velocity);
+        };
+        grid.appendChild(p);
     }
 }
 
-function triggerPad(idx, manual = false, bank = currentBank) {
-    const p = banks[bank][idx]; if (!p || !p.buffer) return;
+function triggerPad(idx, velocity = 1.0) {
+    let buffer, pitchMult = 1.0;
     
+    if (is16Levels && lastSelectedBuffer) {
+        buffer = lastSelectedBuffer;
+        pitchMult = 0.5 + (idx * 0.1); // Chromatic spread
+    } else {
+        buffer = pads[idx].buffer;
+    }
+
+    if (!buffer) return;
+
     const src = audioCtx.createBufferSource();
-    src.buffer = p.buffer;
-    src.connect(masterBus);
+    const gain = audioCtx.createGain();
+    src.buffer = buffer;
+    src.playbackRate.value = pitchMult;
+    gain.gain.value = velocity;
+    src.connect(gain).connect(masterBus);
     src.start(0);
 
-    // Visual feedback for the current bank only
-    if (bank === currentBank) {
-        const el = document.getElementById(`pad-${idx}`);
-        if (el) {
-            el.classList.add('playing');
-            src.onended = () => el.classList.remove('playing');
-        }
-    }
-
-    if (manual && isRec) {
-        let t = (audioCtx.currentTime - startTime) % ((60/bpm)*4);
-        sequence.push({ bank, idx, time: t, played: false });
+    if (isRec) {
+        const time = (audioCtx.currentTime - startTime) % ((60/bpm)*4);
+        sequence.push({ buffer, pitch: pitchMult, time, vel: velocity });
     }
 }
 
-function loopEngine() {
-    if (isPlaying || isRec) {
-        if (!startTime) startTime = audioCtx.currentTime;
-        let loopLen = (60 / bpm) * 4;
-        let pos = (audioCtx.currentTime - startTime) % loopLen;
-        
-        sequence.forEach(n => {
-            if (!n.played && pos >= n.time && pos < n.time + 0.05) { 
-                triggerPad(n.idx, false, n.bank); n.played = true; 
-            }
-        });
-        if (pos < 0.02) sequence.forEach(n => n.played = false);
-    }
-    requestAnimationFrame(loopEngine);
+function toggle16Levels() {
+    is16Levels = !is16Levels;
+    document.getElementById('btn-16').classList.toggle('active', is16Levels);
+    document.getElementById('mode-val').innerText = is16Levels ? "16 LEVELS" : "SAMPLER";
+    renderPads();
 }
 
-async function startRec(idx) {
-    const s = await navigator.mediaDevices.getUserMedia({audio:true});
-    mediaRec = new MediaRecorder(s); chunks = [];
-    mediaRec.ondataavailable = e => chunks.push(e.data);
-    mediaRec.onstop = async () => {
-        banks[currentBank][idx].buffer = await audioCtx.decodeAudioData(await (new Blob(chunks)).arrayBuffer());
-        render();
+function handleFile(e) {
+    init();
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+        const buffer = await audioCtx.decodeAudioData(ev.target.result);
+        pads[0].buffer = buffer;
+        lastSelectedBuffer = buffer;
+        alert("WAV loaded to Pad 1. In MPC 2000XL style, use 16 Levels to play chromatically!");
     };
-    mediaRec.start();
-    document.getElementById(`pad-${idx}`).classList.add('recording');
+    reader.readAsArrayBuffer(e.target.files[0]);
 }
 
-function stopRec() { if(mediaRec && mediaRec.state === "recording") mediaRec.stop(); }
+function togglePlay() { init(); isPlaying = !isPlaying; startTime = audioCtx.currentTime; loop(); }
+function toggleRec() { init(); isRec = !isRec; isPlaying = true; startTime = audioCtx.currentTime; loop(); }
 
-function togglePlay() { 
-    if(!audioCtx) init(); 
-    isPlaying = !isPlaying; 
-    document.getElementById('play-btn').classList.toggle('active', isPlaying);
-    document.getElementById('seq-status').innerText = isPlaying ? "PLAYING" : "STOPPED";
-    if(isPlaying) startTime = audioCtx.currentTime; 
+function loop() {
+    if (!isPlaying) return;
+    const loopLen = (60 / bpm) * 4;
+    const pos = (audioCtx.currentTime - startTime) % loopLen;
+    sequence.forEach(n => {
+        if (!n.played && pos >= n.time && pos < n.time + 0.05) {
+            const src = audioCtx.createBufferSource();
+            src.buffer = n.buffer; src.playbackRate.value = n.pitch;
+            const gain = audioCtx.createGain(); gain.gain.value = n.vel;
+            src.connect(gain).connect(masterBus);
+            src.start(0); n.played = true;
+        }
+    });
+    if (pos < 0.02) sequence.forEach(n => n.played = false);
+    requestAnimationFrame(loop);
 }
 
-function toggleRec() { 
-    if(!audioCtx) init(); 
-    isRec = !isRec; 
-    document.getElementById('rec-btn').classList.toggle('active', isRec);
-    document.getElementById('seq-status').innerText = isRec ? "RECORDING" : (isPlaying ? "PLAYING" : "STOPPED");
-    if(isRec) { isPlaying = true; document.getElementById('play-btn').classList.add('active'); startTime = audioCtx.currentTime; }
-}
+function panic() { isPlaying = isRec = false; sequence.forEach(n => n.played = false); }
 
-function panic() { isPlaying = isRec = false; document.getElementById('play-btn').classList.remove('active'); document.getElementById('rec-btn').classList.remove('active'); document.getElementById('seq-status').innerText = "STOPPED"; }
-function clearSeq() { sequence = []; }
-
-render();
+renderPads();
 </script>
 </body>
 </html>
