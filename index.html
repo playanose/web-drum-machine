@@ -3,124 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KOALA PRO: BITCRUSH</title>
+    <title>SP-KOALA ULTIMATE</title>
     <style>
         :root { 
             --koala-red: #ff3b30; --koala-green: #4cd964; --koala-blue: #007aff;
-            --pad-empty: #1a1a1a; --pad-loaded: #a2a2a2; --lcd: #2c2c2c;
+            --pad-empty: #1a1a1a; --pad-loaded: #a2a2a2; --lcd-bg: #111;
         }
         * { box-sizing: border-box; user-select: none; font-family: 'Courier New', monospace; }
-        body { background: #000; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #fff; }
+        body { background: #000; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #fff; overflow: hidden; }
         
-        .koala-frame { background: #d1d1c4; width: 98vw; max-width: 850px; height: 95vh; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; border: 2px solid #999; }
+        .master-container { background: #d1d1c4; width: 98vw; max-width: 900px; height: 98vh; padding: 12px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; border: 3px solid #999; box-shadow: 0 0 50px #000; }
         
-        .top-lcd { background: var(--lcd); color: var(--koala-green); padding: 12px; border-radius: 6px; border: 3px inset #555; display: flex; justify-content: space-between; align-items: center; }
+        /* LCD SCREEN */
+        .lcd { background: var(--lcd-bg); color: var(--koala-green); padding: 10px; border-radius: 6px; border: 4px inset #555; display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; text-align: center; }
+        .lcd-val { font-size: 18px; font-weight: bold; }
+        .lcd-label { font-size: 8px; text-transform: uppercase; color: #888; }
 
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 10px; flex: 1; padding: 5px; }
-        .pad { background: var(--pad-empty); border: 2px solid #000; border-radius: 8px; position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.1s; }
+        /* GRID */
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 8px; flex: 1; }
+        .pad { background: var(--pad-empty); border: 2px solid #000; border-radius: 8px; position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .pad.has-sample { background: var(--pad-loaded); border-color: #eee; }
-        .pad.playing { background: #fff !important; transform: scale(0.96); }
+        .pad.playing { background: #fff !important; }
         .pad.loop-active { border: 3px solid var(--koala-blue); box-shadow: 0 0 10px var(--koala-blue); }
+        .pad.recording { background: var(--koala-red) !important; animation: blink 0.2s infinite; }
+        .pad-num { position: absolute; top: 4px; left: 6px; font-size: 9px; color: #555; font-weight: bold; }
 
-        .fx-panel { background: #b5b5a5; padding: 10px; border-radius: 6px; border: 2px solid #888; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        .control-group { display: flex; flex-direction: column; gap: 2px; }
-        .label { font-size: 9px; font-weight: bold; color: #333; text-transform: uppercase; }
+        /* CONTROLS */
+        .rack { background: rgba(0,0,0,0.1); padding: 10px; border-radius: 6px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .slider-box { display: flex; flex-direction: column; gap: 4px; }
+        input[type=range] { appearance: none; background: #444; height: 4px; border-radius: 2px; }
+        input[type=range]::-webkit-slider-thumb { appearance: none; width: 14px; height: 20px; background: #eee; border: 1px solid #333; cursor: pointer; }
 
-        .action-btn { background: #333; color: #fff; border: 2px outset #555; padding: 10px; border-radius: 4px; font-weight: bold; font-size: 10px; cursor: pointer; }
-        .action-btn.active { background: var(--koala-red); }
+        .btn-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+        .btn { background: #333; color: #fff; border: 2px outset #555; padding: 10px; border-radius: 4px; font-weight: bold; font-size: 9px; cursor: pointer; text-transform: uppercase; }
+        .btn.active { background: var(--koala-red); }
 
-        input[type=range] { appearance: none; background: #444; height: 4px; border-radius: 2px; width: 100%; }
-        input[type=range]::-webkit-slider-thumb { appearance: none; width: 14px; height: 24px; background: #eee; border: 1px solid #333; cursor: pointer; border-radius: 2px; }
+        /* MODAL */
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #222; padding: 20px; border-radius: 10px; display: none; flex-direction: column; gap: 15px; width: 320px; z-index: 1000; border: 2px solid #fff; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-<div class="koala-frame">
-    <div class="top-lcd">
-        <div>
-            <div style="font-size: 9px;">MASTER BPM</div>
-            <div style="font-size: 18px; font-weight: bold;" id="bpm-num">120</div>
-        </div>
-        <div style="text-align: center;">
-            <div style="font-size: 9px;">LO-FI ENGINE</div>
-            <div style="font-size: 14px; color: #ff9500;" id="crush-display">BYPASS</div>
-        </div>
-        <div style="text-align: right;">
-            <div style="font-size: 9px;">PITCH</div>
-            <div id="pitch-display" style="font-size: 18px; font-weight: bold;">1.00x</div>
-        </div>
+<div id="pad-modal" class="modal">
+    <div style="text-align:center; font-weight:bold; color:var(--koala-green);">PAD TOOLS</div>
+    <div style="display:flex; gap:5px;">
+        <button class="btn" style="flex:1" onclick="togglePadMode()">MODE: <span id="m-text">1-SHOT</span></button>
+        <button class="btn" style="flex:1; background:var(--koala-blue);" onclick="autoChop()">AUTO-CHOP</button>
+    </div>
+    <div style="display:flex; gap:5px;">
+        <button class="btn" style="flex:1" onclick="exportWav()">EXPORT WAV</button>
+        <button class="btn" style="flex:1; background:#444;" onclick="closeModal()">DONE</button>
+    </div>
+</div>
+
+<div class="master-container">
+    <div class="lcd">
+        <div><span class="lcd-label">TEMPO</span><div class="lcd-val" id="bpm-disp">120</div></div>
+        <div><span class="lcd-label">SWING</span><div class="lcd-val" id="swing-disp">50%</div></div>
+        <div><span class="lcd-label">MASTER PITCH</span><div class="lcd-val" id="pitch-disp">1.0x</div></div>
     </div>
 
     <div class="grid" id="grid"></div>
 
-    <div class="fx-panel">
-        <div class="control-group">
-            <span class="label">Tempo</span>
+    <div class="rack">
+        <div class="slider-box">
+            <span class="lcd-label" style="color:#333">BPM</span>
             <input type="range" min="60" max="200" value="120" oninput="updateBPM(this.value)">
         </div>
-        <div class="control-group">
-            <span class="label">Project Pitch</span>
-            <input type="range" min="0.5" max="1.5" step="0.01" value="1.0" oninput="updatePitch(this.value)">
+        <div class="slider-box">
+            <span class="lcd-label" style="color:#333">SWING</span>
+            <input type="range" min="50" max="75" value="50" oninput="updateSwing(this.value)">
         </div>
-        <div class="control-group">
-            <span class="label">Bit Crush (Lo-Fi)</span>
-            <input type="range" id="crush-slider" min="0" max="100" value="0" oninput="updateCrush(this.value)">
+        <div class="slider-box">
+            <span class="lcd-label" style="color:#333">BITCRUSH</span>
+            <input type="range" min="0" max="100" value="0" oninput="updateCrush(this.value)">
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
-        <button class="action-btn" id="play-btn" onclick="togglePlay()">PLAY</button>
-        <button class="action-btn" id="rec-btn" onclick="toggleRec()">REC</button>
-        <button class="action-btn" onclick="clearSeq()">CLEAR</button>
-        <button class="action-btn" style="background: #222;" onclick="panic()">STOP</button>
+    <div class="btn-row">
+        <button class="btn" id="play-btn" onclick="togglePlay()">PLAY</button>
+        <button class="btn" id="rec-btn" onclick="toggleRec()">REC SEQ</button>
+        <button class="btn" onclick="saveProject()">SAVE</button>
+        <button class="btn" onclick="document.getElementById('file-in').click()">LOAD</button>
+        <button class="btn" style="background:#000" onclick="panic()">STOP ALL</button>
     </div>
 </div>
 
+<input type="file" id="file-in" hidden onchange="loadProject(event)">
+
 <script>
 let audioCtx, masterBus, crushNode, banks = { A: {} };
-let bpm = 120, globalPitch = 1.0, crushAmt = 0;
+let bpm = 120, swing = 0.5, pitch = 1.0, crush = 0;
 let isPlaying = false, isRec = false, startTime, sequence = [], activeLoops = {};
-let mediaRec, micChunks = [];
+let mediaRec, chunks = [], editingIdx = null;
 
 function init() {
     if (audioCtx) return;
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     masterBus = audioCtx.createGain();
-    
-    // BITCRUSH ENGINE (ScriptProcessor)
     crushNode = audioCtx.createScriptProcessor(4096, 1, 1);
     crushNode.onaudioprocess = (e) => {
-        let input = e.inputBuffer.getChannelData(0);
-        let output = e.outputBuffer.getChannelData(0);
-        if (crushAmt === 0) { output.set(input); return; }
-        
-        let bits = Math.max(1, 16 - (crushAmt / 8)); // Reduce bits 16 -> 4
-        let step = Math.pow(0.5, bits);
-        for (let i = 0; i < input.length; i++) {
-            output[i] = step * Math.floor(input[i] / step);
-        }
+        let i = e.inputBuffer.getChannelData(0), o = e.outputBuffer.getChannelData(0);
+        if (crush === 0) { o.set(i); return; }
+        let step = Math.pow(0.5, 16 - (crush / 8));
+        for (let j = 0; j < i.length; j++) o[j] = step * Math.floor(i[j] / step);
     };
-
-    masterBus.connect(crushNode);
-    crushNode.connect(audioCtx.destination);
+    masterBus.connect(crushNode); crushNode.connect(audioCtx.destination);
     for(let i=0; i<16; i++) banks.A[i] = { buffer: null, isLoop: false };
-    render();
-    loopEngine();
+    render(); loopEngine();
 }
 
-function updateBPM(v) { bpm = v; document.getElementById('bpm-num').innerText = v; }
-function updatePitch(v) { 
-    globalPitch = parseFloat(v); 
-    document.getElementById('pitch-display').innerText = globalPitch.toFixed(2) + "x";
-    Object.values(activeLoops).forEach(s => s.playbackRate.value = globalPitch);
-}
-function updateCrush(v) { 
-    crushAmt = parseInt(v); 
-    document.getElementById('crush-display').innerText = v > 0 ? v + "% CRUSH" : "BYPASS";
-}
+function updateBPM(v) { bpm = v; document.getElementById('bpm-disp').innerText = v; }
+function updateSwing(v) { swing = v/100; document.getElementById('swing-disp').innerText = v + "%"; }
+function updateCrush(v) { crush = parseInt(v); }
 
 function triggerPad(idx, manual = false) {
-    const p = banks.A[idx]; if (!p.buffer) return;
+    const p = banks.A[idx]; if (!p || !p.buffer) return;
     const el = document.querySelectorAll('.pad')[idx];
 
     if (p.isLoop && activeLoops[idx]) {
@@ -128,63 +127,93 @@ function triggerPad(idx, manual = false) {
         el.classList.remove('loop-active');
     } else {
         const src = audioCtx.createBufferSource();
-        src.buffer = p.buffer; src.playbackRate.value = globalPitch;
+        src.buffer = p.buffer; src.playbackRate.value = pitch;
         if(p.isLoop) { src.loop = true; activeLoops[idx] = src; el.classList.add('loop-active'); }
         src.connect(masterBus); src.start(0);
-        if(!p.isLoop) {
-            el.classList.add('playing');
-            src.onended = () => el.classList.remove('playing');
-        }
+        if(!p.isLoop) { el.classList.add('playing'); src.onended = () => el.classList.remove('playing'); }
     }
     if (manual && isRec) {
-        const timestamp = (audioCtx.currentTime - startTime) % ((60/bpm) * 4);
-        sequence.push({ idx, time: timestamp, played: false });
+        let t = (audioCtx.currentTime - startTime) % ((60/bpm)*4);
+        sequence.push({ idx, time: t, played: false });
     }
+}
+
+function autoChop() {
+    const p = banks.A[editingIdx]; if(!p.buffer) return;
+    let len = Math.floor(p.buffer.length / 16);
+    for(let i=0; i<16; i++) {
+        let b = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+        b.copyToChannel(p.buffer.getChannelData(0).slice(i*len, (i+1)*len), 0);
+        banks.A[i].buffer = b;
+    }
+    closeModal(); render();
 }
 
 function loopEngine() {
     if (isPlaying || isRec) {
         if (!startTime) startTime = audioCtx.currentTime;
-        const loopLen = (60 / bpm) * 4;
-        const currentPos = (audioCtx.currentTime - startTime) % loopLen;
-        sequence.forEach(note => {
-            if (!note.played && currentPos >= note.time && currentPos < note.time + 0.05) {
-                triggerPad(note.idx); note.played = true;
-            }
+        let loopLen = (60 / bpm) * 4;
+        let pos = (audioCtx.currentTime - startTime) % loopLen;
+        sequence.forEach(n => {
+            if (!n.played && pos >= n.time && pos < n.time + 0.05) { triggerPad(n.idx); n.played = true; }
         });
-        if (currentPos < 0.02) sequence.forEach(n => n.played = false);
+        if (pos < 0.02) sequence.forEach(n => n.played = false);
     }
     requestAnimationFrame(loopEngine);
 }
 
-function togglePlay() { if(!audioCtx) init(); isPlaying = !isPlaying; document.getElementById('play-btn').classList.toggle('active', isPlaying); if(isPlaying) startTime = audioCtx.currentTime; }
-function toggleRec() { if(!audioCtx) init(); isRec = !isRec; document.getElementById('rec-btn').classList.toggle('active', isRec); if(isRec) { isPlaying = true; startTime = audioCtx.currentTime; } }
-async function startMicRec(idx) {
-    const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRec = new MediaRecorder(s); micChunks = [];
-    mediaRec.ondataavailable = e => micChunks.push(e.data);
-    mediaRec.onstop = async () => {
-        banks.A[idx].buffer = await audioCtx.decodeAudioData(await (new Blob(micChunks)).arrayBuffer());
-        render();
-    };
-    mediaRec.start();
-    document.querySelectorAll('.pad')[idx].classList.add('playing');
-}
-function stopMicRec() { if(mediaRec) mediaRec.stop(); }
 function render() {
     const g = document.getElementById('grid'); g.innerHTML = '';
     for(let i=0; i<16; i++) {
         const p = banks.A[i]; const b = document.createElement('div');
         b.className = `pad ${p.buffer ? 'has-sample' : ''}`;
-        b.innerHTML = `<span style="position:absolute;top:5px;left:8px;font-size:9px;color:#555;">${i+1}</span>`;
-        b.onmousedown = () => { if(!audioCtx) init(); if(!p.buffer) startMicRec(i); else triggerPad(i, true); };
-        b.onmouseup = () => stopMicRec();
-        b.oncontextmenu = (e) => { e.preventDefault(); if(p.buffer) { banks.A[i].isLoop = !banks.A[i].isLoop; render(); } };
+        b.innerHTML = `<span class="pad-num">${i+1}</span>`;
+        b.onmousedown = () => { if(!audioCtx) init(); if(!p.buffer) startRec(i); else triggerPad(i, true); };
+        b.onmouseup = () => stopRec();
+        b.oncontextmenu = (e) => { e.preventDefault(); if(p.buffer) { editingIdx = i; openModal(); } };
         g.appendChild(b);
     }
 }
+
+async function startRec(idx) {
+    const s = await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRec = new MediaRecorder(s); chunks = [];
+    mediaRec.ondataavailable = e => chunks.push(e.data);
+    mediaRec.onstop = async () => {
+        banks.A[idx].buffer = await audioCtx.decodeAudioData(await (new Blob(chunks)).arrayBuffer());
+        render();
+    };
+    mediaRec.start();
+    document.querySelectorAll('.pad')[idx].classList.add('recording');
+}
+function stopRec() { if(mediaRec) mediaRec.stop(); }
+function togglePlay() { if(!audioCtx) init(); isPlaying = !isPlaying; document.getElementById('play-btn').classList.toggle('active', isPlaying); startTime = audioCtx.currentTime; }
+function toggleRec() { if(!audioCtx) init(); isRec = !isRec; document.getElementById('rec-btn').classList.toggle('active', isRec); isPlaying = true; startTime = audioCtx.currentTime; }
 function panic() { Object.values(activeLoops).forEach(s => s.stop()); activeLoops = {}; isPlaying = isRec = false; render(); }
-function clearSeq() { sequence = []; }
+function openModal() { document.getElementById('m-text').innerText = banks.A[editingIdx].isLoop ? "LOOP" : "1-SHOT"; document.getElementById('pad-modal').style.display = 'flex'; }
+function closeModal() { document.getElementById('pad-modal').style.display = 'none'; }
+function togglePadMode() { banks.A[editingIdx].isLoop = !banks.A[editingIdx].isLoop; openModal(); render(); }
+
+// FILE SAVING
+function saveProject() {
+    let data = { bpm, sequence, pads: [] };
+    for(let i=0; i<16; i++) data.pads.push({ isLoop: banks.A[i].isLoop });
+    let blob = new Blob([JSON.stringify(data)], {type:'application/json'});
+    let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'PROJECT.json'; a.click();
+}
+async function loadProject(e) {
+    let f = e.target.files[0]; if(!f) return;
+    let data = JSON.parse(await f.text());
+    bpm = data.bpm; sequence = data.sequence;
+    data.pads.forEach((p, i) => banks.A[i].isLoop = p.isLoop);
+    updateBPM(bpm); render();
+}
+
+function exportWav() {
+    alert("WAV Exporting... (Pad " + (editingIdx+1) + ")");
+    // Placeholder for WAV logic from previous version
+}
+
 render();
 </script>
 </body>
